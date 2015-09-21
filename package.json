@@ -1,5 +1,5 @@
 {
-  "name": "evented",
+  "name": "event-store",
   "version": "0.1.0",
   "description": "Event sourcing made easy.",
   "author": {

@@ -1,11 +1,11 @@
-# evented
+# event-store
 
 Event sourcing made easy.
 
 ## Instalation
 
 ``` bash
-$ npm install evented
+$ npm install event-store
 ```
 
 ## Usage
