@@ -4,7 +4,7 @@ import should from 'should';
 import {Entity, Repository} from '../lib';
 
 const config = {
-  mongo: 'mongodb://127.0.0.1:27017/test-evented'
+  mongo: 'mongodb://127.0.0.1:27017/test-event-store'
 };
 
 let id = 0;
