@@ -8,7 +8,7 @@
   },
   "main": "./node/index",
   "scripts": {
-    "test": "mocha",
+    "test": "make test",
     "postinstall": "make"
   },
   "dependencies": {
