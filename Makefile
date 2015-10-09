@@ -4,7 +4,6 @@ BROWSERIFY = ./node_modules/.bin/browserify
 all: node
 
 node: lib
-	@mkdir -p node/
 	$(BABEL) lib -d node
 
 dist: lib
@@ -22,4 +21,4 @@ test:
 		--recursive \
 		test
 
-.PHONY: test clean
+.PHONY: test clean node
