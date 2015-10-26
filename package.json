@@ -8,19 +8,20 @@
   },
   "main": "./node/index",
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "prepublish": "make"
   },
   "dependencies": {
-    "babel": "^5.8.23",
+    "babel": "^5.8.29",
     "debug": "^2.2.0",
     "eventemitter3": "^1.1.1",
     "lodash": "^3.10.1",
-    "mongojs": "^1.4.0",
+    "mongojs": "^1.4.1",
     "predefine": "^0.1.2"
   },
   "devDependencies": {
     "mocha": "~2.3.3",
-    "pre-commit": "1.1.1",
-    "should": "^7.1.0"
+    "pre-commit": "1.1.2",
+    "should": "^7.1.1"
   }
 }
