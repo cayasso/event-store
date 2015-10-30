@@ -1,6 +1,6 @@
 {
   "name": "event-store",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Event sourcing made easy.",
   "author": {
     "name": "Jonathan Brumley",
