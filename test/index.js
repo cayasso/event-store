@@ -215,7 +215,6 @@ describe('evvented', function() {
 
     it('should have required methods', () => {
       let repository = new TestEntityRepository(TestEntity, config);
-      repository.set.should.be.a.Function;
       repository.get.should.be.a.Function;
       repository.commit.should.be.a.Function;
     });
