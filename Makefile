@@ -12,7 +12,7 @@ test:
 	@./node_modules/.bin/mocha \
 		--reporter spec \
 		--require should \
-		--require babel/register \
+		--require babel-core/register \
 		--recursive \
 		test
 

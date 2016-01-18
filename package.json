@@ -12,17 +12,34 @@
     "prepublish": "make"
   },
   "dependencies": {
-    "babel": "^5.8.29",
     "callback-queue": "^1.1.1",
     "debug": "^2.2.0",
     "eventemitter3": "^1.1.1",
     "lodash": "^4.0.0",
-    "mongojs": "^1.4.1",
+    "mongojs": "^2.3.0",
     "predefine": "^0.1.2"
   },
   "devDependencies": {
-    "mocha": "~2.3.3",
+    "babel-cli": "^6.4.0",
+    "babel-core": "^6.4.0",
+    "babel-plugin-add-module-exports": "^0.1.3-alpha",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-stage-2": "^6.3.13",
+    "babel-register": "^6.4.3",
+    "mocha": "~2.3.4",
     "pre-commit": "1.1.2",
-    "should": "^7.1.1"
-  }
+    "should": "^8.1.1"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-2"
+    ],
+    "plugins": [
+      "babel-plugin-add-module-exports"
+    ]
+  },
+  "pre-commit": [
+    "test"
+  ]
 }
