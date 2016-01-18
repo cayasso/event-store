@@ -16,7 +16,7 @@
     "callback-queue": "^1.1.1",
     "debug": "^2.2.0",
     "eventemitter3": "^1.1.1",
-    "lodash": "^3.10.1",
+    "lodash": "^4.0.0",
     "mongojs": "^1.4.1",
     "predefine": "^0.1.2"
   },

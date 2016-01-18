@@ -1,20 +1,27 @@
 'use strict';
 
 import should from 'should';
+import MongoJS from 'mongojs';
 import {Entity, Repository} from '../lib';
 
-const config = {
-  mongo: 'mongodb://127.0.0.1:27017/test-event-store'
-};
+const MONGO_URL = 'mongodb://127.0.0.1:27017/test-event-store';
+const db = new MongoJS(MONGO_URL);
+const config = { db };
 
 let id = 0;
 
 class TestEntity extends Entity {
-  
-  constructor() {
+
+  constructor(id) {
     super();
-    this.id = ++id;
+    this.id = id || ++id;
     this.status = 'created';
+  }
+
+  init() {
+    this.status = 'initiated';
+    this.record('init');
+    return this;
   }
 
   start(data) {
@@ -22,6 +29,7 @@ class TestEntity extends Entity {
     this.startedBy = data.agent;
     this.record('start', data);
     this.emit('started');
+    return this;
   }
 
   end(data) {
@@ -29,6 +37,7 @@ class TestEntity extends Entity {
     this.endedBy = data.agent;
     this.record('end', data);
     this.enqueue('ended');
+    return this;
   }
 }
 
@@ -38,7 +47,7 @@ class TestEntityRepository extends Repository {
   }
 }
 
-describe('evvented', function() {
+describe('event-store', function() {
 
   describe('Entity', () => {
 
@@ -92,12 +101,12 @@ describe('evvented', function() {
 
     it('should replay a single event', () => {
       let entity = new TestEntity();
-      entity.replay({ 
+      entity.replay({
         "cmd": "start",
         "data": { "agent": "tomas" },
         "id": entity.id,
         "revision": 1,
-        "ts": 1442799956314 
+        "ts": 1442799956314
       });
       entity.status.should.be.eql('started');
       entity.startedBy.should.be.eql('tomas');
@@ -106,18 +115,18 @@ describe('evvented', function() {
 
     it('should replay an array of events', () => {
       let entity = new TestEntity();
-      entity.replay([{ 
+      entity.replay([{
         "cmd": "start",
         "data": { "agent": "tomas" },
         "id": entity.id,
         "revision": 1,
-        "ts": 1442799956314 
-      },{ 
+        "ts": 1442799956314
+      },{
         "cmd": "end",
         "data": { "agent": "mery" },
         "id": entity.id,
         "revision": 2,
-        "ts": 1442799956315 
+        "ts": 1442799956315
       }]);
       entity.status.should.be.eql('ended');
       entity.endedBy.should.be.eql('mery');
@@ -129,23 +138,23 @@ describe('evvented', function() {
       entity.on('start', function() {
         throw Error('Should not emit start');
       })
-      entity.replay({ 
+      entity.replay({
         "cmd": "start",
         "data": { "agent": "tomas" },
         "id": entity.id,
         "revision": 1,
-        "ts": 1442799956314 
+        "ts": 1442799956314
       });
     });
 
     it('should not add replaying events to the array of events', () => {
       let entity = new TestEntity();
-      entity.replay({ 
+      entity.replay({
         "cmd": "start",
         "data": { "agent": "tomas" },
         "id": entity.id,
         "revision": 1,
-        "ts": 1442799956314 
+        "ts": 1442799956314
       });
       entity.events.should.be.empty();
     });
@@ -207,7 +216,7 @@ describe('evvented', function() {
       }).should.throw('Invalid entity instance provided.');
     });
 
-    it('should throw error if no connection mongodb string or object is provided', function () {
+    it('should throw error if no mongodb connection string or object is provided', function () {
       (function () {
         new TestEntityRepository(TestEntity);
       }).should.throw(/required MongoStore db instance/);
@@ -219,8 +228,60 @@ describe('evvented', function() {
       repository.commit.should.be.a.Function;
     });
 
+    it('should commit and get single entity', function (done) {
+      let repository = new TestEntityRepository(TestEntity, config);
+      let t1 = new TestEntity('t1').init();
+      repository.commit(t1, (err) => {
+        if (err) return done(err);
+        repository.get('t1', (err, entity) => {
+          if (err) return done(err);
+          entity.should.be.an.instanceof(Entity);
+          t1.id.should.eql(entity.id);
+          done();
+        });
+      });
+    })
+
+    it('should commit and get multiple entities', function (done) {
+      let repository = new TestEntityRepository(TestEntity, config);
+      let foo = new TestEntity('foo').init();
+      let bar = new TestEntity('bar').init();
+      repository.commit([foo, bar], (err, entities) => {
+        if (err) return done(err);
+        repository.get(['foo', 'bar'], (err, entities) => {
+          if (err) return done(err);
+          foo.id.should.eql(entities[0].id);
+          bar.id.should.eql(entities[1].id);
+          done();
+        });
+      });
+    })
+
+    it('should commit and get multiple entities by snapshot', function (done) {
+      let repository = new TestEntityRepository(TestEntity, config);
+      let x = new TestEntity('x').init().start({ agent: 'Martha' });
+      let y = new TestEntity('y').init().start({ agent: 'Josh' });
+      repository.commit([x, y], { snap: true }, (err, entities) => {
+        if (err) return done(err);
+        repository.get(['x', 'y'], (err, entities) => {
+          if (err) return done(err);
+          entities[0].revision.should.eql(2);
+          x.id.should.eql(entities[0].id);
+          x.startedBy.should.eql(entities[0].startedBy);
+          entities[1].revision.should.eql(2);
+          y.id.should.eql(entities[1].id);
+          y.startedBy.should.eql(entities[1].startedBy);
+          done();
+        });
+      });
+    })
+
+  });
+
+  after(function (done) {
+    db.dropDatabase(function () {
+      db.close(done);
+    });
   });
 
 });
-
-
