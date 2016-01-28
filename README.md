@@ -14,7 +14,149 @@ $ npm install event-store
 
 ## Usage
 
+order.js
+
+```js
+import { Entity } from 'event-store';
+
+const id = 0;
+
+class Order extends Entity {
+
+  constructor(id) {
+    super();
+    this.id = id || ++id;
+    this.amountDue = 0;
+    this.amountPaid = 0;
+    this.balance = 0;
+  }
+
+  initialize(data) {
+    this.amountDue = data.amountDue;
+    this.record('initialize', data);
+    this.enqueue('initialized', data);
+  }
+
+  pay(data) {
+    this.amountPaid = data.amountPaid;
+    this.record('pay', data);
+    this.enqueue('paid', data);
+    return this;
+  }
+
+  get balance() {
+    return this.amountDue - this.amountPaid;
+  }
+}
+```
+
+order-store.js
+
+```js
+
+import { Store } from 'event-store';
+
+class OrderStore extends Store {
+  /**
+   * Initialize `Repository` object.
+   *
+   * @param {Object} options
+   * @return {Repository} this
+   * @api private
+   */
+
+  constructor) {
+    super(Order);
+    this.cache = {};
+  }
+
+  /**
+   * Gent order instance.
+   *
+   * @param {String} id
+   * @param {Function} fn
+   */
+
+  // We extend the get method to support
+  // getting and storing entities to cache.
+  get(id, fn) {
+
+    // Try to get entity from cache
+    let order = this.cache[id];
+    if (order) return fn(null, order, true);
+
+    // Call our parent get method.
+    super.get(id, (err, order) => {
+      if (err) return fn(err);
+      if (!order) order = new Order(id);
+
+      // store entity in cache and bind events
+      this.bind(this.cache[id] = order);
+      fn(null, order, false);
+    });
+  }
+
+  bind(order) {
+
+    order.on('init', data => {
+      console.log('order was initialized with amount due', order.amountDue);
+    });
+
+    order.on('paid', data => {
+      console.log('order was paid', order.amountPaid);
+      console.log('order remaining balance is', order.balance);
+    });
+  }
+}
+```
+
+index.js
+
+```js
+import Order from './order';
+import OrderStore from './order-store';
+
+// creating instances
+const orderStore = new OrderStore(Order);
+const order = new Order('abc123');
+
+// Initialize order
+order.initialize({ amountDue: 2500 });
+
+// Pay order
+order.pay({ amountPaid: 2000 });
+
+// persist our order entity to the store
+orderStore.commit(order, (err, order) => {
+  console.log(order.id); //=> abc123
+});
+
+// later in your code:
+// get order entity by id with events applied
+orderStore.get('abc123', (err, order, cached) => {
+
+  console.log('order from cache? ', cached);
+
+  console.log(order.balance); //=> 500
+
+  order.pay({ amountPaid: 500 });
+
+  console.log(order.balance); //=> 0
+
+  // persist change
+  orderStore.commit(order, (err, order) => {
+    console.log(order.id); //=> abc123
+
+    const snapshot = order.snap();
+    console.log(snapshot.balance); //=> 0
+  });
+
+});
+```
+
 ## API
+
+For API usage please check [event-store-entity](https://github.com/cayasso/event-store-entity) and [event-store-mongo](https://github.com/cayasso/event-store-mongo) readme files.
 
 ## Run tests
 
