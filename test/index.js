@@ -2,7 +2,7 @@
 
 import should from 'should';
 import MongoJS from 'mongojs';
-import {Entity, Repository} from '../lib';
+import { Entity, Store } from '../lib';
 
 const MONGO_URL = 'mongodb://127.0.0.1:27017/test-event-store';
 const db = new MongoJS(MONGO_URL);
@@ -41,7 +41,7 @@ class TestEntity extends Entity {
   }
 }
 
-class TestEntityRepository extends Repository {
+class TestEntityStore extends Store {
   constructor(Entity, options) {
     super(Entity, options);
   }
@@ -192,44 +192,44 @@ describe('event-store', function() {
 
   });
 
-  describe('Repository', () => {
+  describe('Store', () => {
 
     it('should be a function', () => {
-      Repository.should.be.a.Function;
+      Store.should.be.a.Function;
     });
 
     it('should throw error if trying to instantiate directly', function () {
       (function () {
-        new Repository();
+        new Store();
       }).should.throw('Can not instantiate abstract class.');
     });
 
     it('should throw error if missing entity class', function () {
       (function () {
-        new TestEntityRepository();
+        new TestEntityStore();
       }).should.throw("Entity class is required.");
     });
 
     it('should throw error on providing invalid entity instance', function () {
       (function () {
-        new TestEntityRepository({});
-      }).should.throw('Invalid entity instance provided.');
+        new TestEntityStore({});
+      }).should.throw('The given entity is not a constructor.');
     });
 
     it('should throw error if no mongodb connection string or object is provided', function () {
       (function () {
-        new TestEntityRepository(TestEntity);
+        new TestEntityStore(TestEntity);
       }).should.throw(/required MongoStore db instance/);
     });
 
     it('should have required methods', () => {
-      let repository = new TestEntityRepository(TestEntity, config);
+      let repository = new TestEntityStore(TestEntity, config);
       repository.get.should.be.a.Function;
       repository.commit.should.be.a.Function;
     });
 
     it('should commit and get single entity', function (done) {
-      let repository = new TestEntityRepository(TestEntity, config);
+      let repository = new TestEntityStore(TestEntity, config);
       let t1 = new TestEntity('t1').init();
       repository.commit(t1, (err) => {
         if (err) return done(err);
@@ -243,7 +243,7 @@ describe('event-store', function() {
     })
 
     it('should commit and get multiple entities', function (done) {
-      let repository = new TestEntityRepository(TestEntity, config);
+      let repository = new TestEntityStore(TestEntity, config);
       let foo = new TestEntity('foo').init();
       let bar = new TestEntity('bar').init();
       repository.commit([foo, bar], (err, entities) => {
@@ -258,7 +258,7 @@ describe('event-store', function() {
     })
 
     it('should commit and get multiple entities by snapshot', function (done) {
-      let repository = new TestEntityRepository(TestEntity, config);
+      let repository = new TestEntityStore(TestEntity, config);
       let x = new TestEntity('x').init().start({ agent: 'Martha' });
       let y = new TestEntity('y').init().start({ agent: 'Josh' });
       repository.commit([x, y], { snap: true }, (err, entities) => {
