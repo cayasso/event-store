@@ -57,25 +57,11 @@ order-store.js
 import { Store } from 'event-store';
 
 class OrderStore extends Store {
-  /**
-   * Initialize `Repository` object.
-   *
-   * @param {Object} options
-   * @return {Repository} this
-   * @api private
-   */
 
-  constructor) {
+  constructor(Order) {
     super(Order);
     this.cache = {};
   }
-
-  /**
-   * Gent order instance.
-   *
-   * @param {String} id
-   * @param {Function} fn
-   */
 
   // We extend the get method to support
   // getting and storing entities to cache.
