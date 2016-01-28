@@ -38,7 +38,7 @@ class Order extends Entity {
   }
 
   pay(data) {
-    this.amountPaid = data.amountPaid;
+    this.amountPaid += data.amountPaid;
     this.record('pay', data);
     this.enqueue('paid', data);
     return this;
