@@ -1,6 +1,6 @@
 {
   "name": "event-store",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Event sourcing made easy.",
   "author": {
     "name": "Jonathan Brumley",
@@ -37,6 +37,6 @@
   ],
   "dependencies": {
     "event-store-entity": "^0.1.3",
-    "event-store-mongo": "^0.1.3"
+    "event-store-mongo": "^0.1.4"
   }
 }
