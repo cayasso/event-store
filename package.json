@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "event-store-cmd": "^0.1.2",
-    "event-store-entity": "^0.2.3",
+    "event-store-entity": "^0.2.4",
     "event-store-mongo": "^0.2.1"
   }
 }
